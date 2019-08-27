@@ -3,7 +3,7 @@
 <head>
 
   <title></title>
-<script src="http://prcweb.co.uk/js/d3.v2.js"></script>
+<script src="projection.js"></script>
 <style type="text/css">
       text {-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
       #main {width: 600px; margin-left: auto; margin-right: auto; font: 14px Helvetica Neue;}
@@ -15,8 +15,8 @@
       svg text {font-family: helvetica, sans-serif; fill: #555;}
       #status {cursor: pointer; text-anchor: middle;}
       #status g.first text.time {font-size: 14px;}
-      #status g.first text.value {font-size: 44px; font-weight: bold;}
-      #status g.first text.units {font-size: 12px;}
+     /* #status g.first text.value {font-size: 44px; font-weight: bold;}
+      #status g.first text.units {font-size: 12px;}*/
 
       #status g.second text.time, #status g.third text.time {font-size: 12px;}
       #status g.second text.value, #status g.third text.value {font-size: 30px; fill: #555;}
@@ -35,27 +35,27 @@
 
      <g id="status">
             <g class="first">
-              <text class="time" x="300" y="237"></text>
-              <text class="value" x="300" y="276"></text>
-              <text class="units" x="300" y="290"></text>
+              <text class="time" x="300" y="257"></text>
+              <!-- <text class="value" x="300" y="276"></text>
+              <text class="units" x="300" y="290"></text> -->
             </g>
             <g class="second">
-              <text class="time" x="255" y="320"></text>
-              <text class="value" x="255" y="347"></text>
-              <text class="units" x="255" y="360"></text>
+              <!-- <text class="time" x="255" y="320"></text> -->
+              <text class="value" x="300" y="317"></text>
+              <!-- <text class="units" x="255" y="360"></text> -->
             </g>
-            <g class="third">
+           <!--  <g class="third">
               <text class="time" x="345" y="320">Projection</text>
               <text class="value" x="345" y="347"></text>
               <text class="units" x="345" y="360"></text>
-            </g>
+            </g> -->
       </g>
 
    </svg>
 
 </div>
 <script type="text/javascript">
- var energy_data = [86.81,99.91,99.95,99.70,99.98,99.87,99.88,100.00,95.76,99.89,100.00,100.00,99.6,100.00,99.78,100.00,76.74,99.98,99.28,100.00,97.57,67.93,5,5,5,5,5,5,5,5,5,
+ var testResults = [86.81,99.91,99.95,99.70,99.98,99.87,99.88,100.00,95.76,99.89,100.00,100.00,99.6,100.00,99.78,100.00,76.74,99.98,99.28,100.00,97.57,67.93,5,5,5,5,5,5,5,5,5,
  86.81,99.93,99.86,99.7,99.89,99.87,99.88,100,95.76,99.89,100,100,89.13,100,99.78,100,76.74,99.89,99.03,100,95.03,0,0,0,0,0,0,0,0,0,0,
  86.81,83,99.95,99.7,99.98,99.87,99.88,100,100,99.89,100,100,89.13,100,99.78,100,76.74,99.89,99.03,100,97.57,67.93,0,0,0,0,0,0,0,0,0,
  86.81,99.91,99.25,99.7,99.89,94.00,99.88,100.00,100.00,99.89,100.00,100.00,99.85,100.00,99.78,100.00,76.74,99.98,99.28,100.00,97.62,67.93,0,0,0,0,0,0,0,0,0,
@@ -69,16 +69,15 @@
 //   energy_data[x] = energy_data[x].toFixed(2);
 // }
 
-// var new_energy_data = energy_data;
 
 var base_ts = 1283731200000;
 var week = 0;
 var totals = {devices:[], week:0};
-var display_mode = 0, display_modes = [{label: 'units', prefix: ''}, {label: '', prefix: '£'}, {label: 'kgs CO2', prefix: ''}];
+var display_mode = 0, display_modes = [{label: '%', prefix: ''}, {label: '', prefix: '£'}, {label: 'kgs CO2', prefix: ''}];
 var run_data;
 // var testcases = ["BT","AoD",ConfCall","DTV","FMradio","HLR","MultiUser","SLock","SDCard"];
 
-var testcases = ["PYM Ext","Telephony","SMS/MMS","MM Ext","MMedia","Email","Chrome","MenuNav","PIM","Email Ext","NFC","WiFi","Wifi Ext","MWindow","Tel. Ext","Call Inter.","Sms Inter.","VoWiFi","VoLTE","SF","MultiTask","ViLTE","BT","Aod","ConfCall","DTV","FMradio","HLR","MultiUser","SLock","SDCard"];
+var testCases = ["PYM Ext","Telephony","SMS/MMS","MM Ext","MMedia","Email","Chrome","MenuNav","PIM","Email Ext","NFC","WiFi","Wifi Ext","MWindow","Tel. Ext","Call Inter.","Sms Inter.","VoWiFi","VoLTE","SF","MultiTask","ViLTE","BT","Aod","ConfCall","DTV","FMradio","HLR","MultiUser","SLock","SDCard"];
 
 // var testcases = ["PYM Ext","Telephony","SMS/MMS","MM Ext","MMedia","Email","Chrome","MenuNav","PIM","Email Ext","NFC","WiFi","Wifi Ext","MWindow","Tel. Ext","Call Inter.","Sms Inter.","VoWiFi","VoLTE","SF","MultiTask","ViLTE"];
 
@@ -87,12 +86,12 @@ var dev_lables = [];
 for (var dev in devices){
   dev_lables.push('-'+devices[dev].substr(devices[dev].length - 3));
 }
-var n_tc = testcases.length;
+var n_tc = testCases.length;
 
 
 var unit_cost = 0.137 /* http://www.confusedaboutenergy.co.uk/index.php/domestic-fuels/fuel-prices */, unit_co2 = 0.450 /* from realtimecarbon.org */;
 
-run_data = energy_data.slice(week*7*n_tc,(week+1)*7*n_tc);
+run_data = testResults.slice(week*7*n_tc,(week+1)*7*n_tc);
 console.log(run_data);
 totals = calculate_totals(run_data);
 console.log(totals);
@@ -106,7 +105,7 @@ sa = function(d, i) {return (i*2*Math.PI)/n_tc;}
 ea = function(d, i) {return ((i+1)*2*Math.PI)/n_tc;}
 
 //Draw the chart
-var color = d3.scale.quantile().domain([0,95,97,100]).range(['#000000','#ff3333','#ff8080','#ffe6e6']);
+var color = d3.scale.quantile().domain([0.1,95,97,100]).range(['#000000','#ff3333','#ff8080','#ffe6e6']);
 //var color = d3.scale.quantize().domain([0,95,97,100]).range(['#000000','#ff3333','#ff8080','#ffe6e6']);
 d3.select('#chart').selectAll('path').data(run_data)
   .enter().append('svg:path')
@@ -149,7 +148,7 @@ for(var i=0; i<n_tc; i++) {
     .append("textPath")
     .attr("xlink:href", "#time_path")
     .attr("startOffset", i*100/n_tc+"%")
-    .text(convert_to_ampm(i));
+    .text(testCaseLabels(i));
 }
 
 reset_hour_info();
@@ -163,7 +162,7 @@ d3.selectAll("#status").on('click', function() {
 d3.select('#upweek').on('click', function() {
   if(week>=25) return;
   week++;
-  run_data = energy_data.slice(week*7*n_tc,(week+1)*7*n_tc);
+  run_data = testResults.slice(week*7*n_tc,(week+1)*7*n_tc);
   d3.select('#chart').selectAll('path').data(run_data).attr('fill', color);
   totals = calculate_totals(run_data);
   reset_hour_info();
@@ -172,7 +171,7 @@ d3.select('#upweek').on('click', function() {
 d3.select('#downweek').on('click', function() {
   if(week<=0) return;
   week--;
-  run_data = energy_data.slice(week*7*n_tc,(week+1)*7*n_tc);
+  run_data = testResults.slice(week*7*n_tc,(week+1)*7*n_tc);
   d3.select('#chart').selectAll('path').data(run_data).attr('fill', color);
   totals = calculate_totals(run_data);
   reset_hour_info();
@@ -188,9 +187,9 @@ function render_hour_info(d, i) {
   var dm = display_modes[display_mode];
 
   //Update times
-  d3.select('#status g.first text.time').text(devices[day]);
-  d3.select('#status g.second text.time').text(convert_to_ampm(h)+' - '+convert_to_ampm(parseInt(h)+1));
-  d3.select('#status g.third text.time').text('Projection');
+  // d3.select('#status g.first text.time').text(devices[day]);
+  // d3.select('#status g.second text.time').text(testCaseLabels(h)+' - '+testCaseLabels(parseInt(h)+1));
+  // d3.select('#status g.third text.time').text('Projection');
 
   //Update value
   switch(display_mode) {
@@ -199,18 +198,18 @@ function render_hour_info(d, i) {
       d3.select('#status g.second text.value').text(dm.prefix+kwh.toFixed(1));
       d3.select('#status g.third text.value').text(dm.prefix+(day_kwh*365).toFixed(0));
       break;
-    case 1:
-      d3.select('#status g.first text.value').text(dm.prefix+(unit_cost*day_kwh).toFixed(2));
-      d3.select('#status g.second text.value').text(dm.prefix+(unit_cost*kwh).toFixed(2));
-      d3.select('#status g.third text.value').text(dm.prefix+(unit_cost*day_kwh*365).toFixed(0));
-      break;
-    case 2:
-      d3.select('#status g.first text.value').text(dm.prefix+(unit_co2*day_kwh).toFixed(1));
-      d3.select('#status g.second text.value').text(dm.prefix+(unit_co2*kwh).toFixed(1));
-      d3.select('#status g.third text.value').text(dm.prefix+(unit_co2*day_kwh*365).toFixed(0));
-      break;
+    // case 1:
+    //   d3.select('#status g.first text.value').text(dm.prefix+(unit_cost*day_kwh).toFixed(2));
+    //   d3.select('#status g.second text.value').text(dm.prefix+(unit_cost*kwh).toFixed(2));
+    //   d3.select('#status g.third text.value').text(dm.prefix+(unit_cost*day_kwh*365).toFixed(0));
+    //   break;
+    // case 2:
+    //   d3.select('#status g.first text.value').text(dm.prefix+(unit_co2*day_kwh).toFixed(1));
+    //   d3.select('#status g.second text.value').text(dm.prefix+(unit_co2*kwh).toFixed(1));
+    //   d3.select('#status g.third text.value').text(dm.prefix+(unit_co2*day_kwh*365).toFixed(0));
+      // break;
   }
-
+console.log(display_mode);
   //Update units
   d3.select('#status g.first text.units').text(dm.label);
   d3.select('#status g.second text.units').text(dm.label);
@@ -263,8 +262,8 @@ function calculate_totals(run_data) {
   return totals;
 }
 
-function convert_to_ampm(h) {
-  return testcases[h];
+function testCaseLabels(h) {
+  return testCases[h];
 }
 
 </script>
